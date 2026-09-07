@@ -1,1 +1,5 @@
+# VScode et UV
 .vscode
+src
+.python-version
+pyproject.toml
