@@ -4,6 +4,15 @@ import streamlit as st
 
 st.write("SQL - SRS")
 
+option = st.selectbox(
+    "Choix du sujet à réviser :",
+    ("Joins", "GroupBy", "Windows Function"),
+    index=None,
+    placeholder="Selection du sujet"
+)
+
+st.write('Sujet choisi : ', option)
+
 tab1, tab2, tab3 = st.tabs(["Cat", "Dog", "Howl"])
 
 data = {
