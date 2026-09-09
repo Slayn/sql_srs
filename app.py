@@ -3,9 +3,8 @@
 import duckdb
 import pandas as pd
 import streamlit as st
+import io
 
-
-# Gestion des données
 data = {
     'store_id': ["Armentieres", "Armentieres", "Armentieres", "Armentieres", "Lille", "Lille", "Lille", "Lille", "Douai", "Douai", "Douai", "Douai"],
     'product_name': ['redbull', 'chips', 'wine', 'redbull', 'redbull', 'chips', 'wine', 'icecream', 'redbull', 'chips', 'wine', 'icecream'],
@@ -17,10 +16,11 @@ answer = """
 SELECT * FROM data
 WHERE product_name = 'redbull'
 """
+
 solution = duckdb.sql(answer).df()
 
 
-# Titre du programme
+# Titre
 st.write("SQL - SRS")
 
 
@@ -37,6 +37,8 @@ with st.sidebar:
 
 
 # Header / toujours affiché
+
+
 input_sql = st.text_area(label="Entrez votre requête :", key="user_input")
 
 if input_sql != '':
@@ -47,7 +49,7 @@ if input_sql != '':
 # Tab list
 tab1, tab2 = st.tabs(["Tables", "Solution"])
 
-# Tabs content
+# Content
 with tab1:
     st.write('Table : data')
     st.dataframe(data)
