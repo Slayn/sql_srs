@@ -77,7 +77,7 @@ if input_sql != "":
         compare = result.compare(solution_df)
         st.write("Parfait ! C'est le bon résultat")
         st.dataframe(result)
-    except:
+    except ValueError:
         st.write(r"/!\ Le résultat n'est pas celui attendu")
         st.dataframe(result)
 
