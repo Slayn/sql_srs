@@ -8,7 +8,7 @@ def get_all_exercice_information(theme):
 
     # Récupération de la solution
     answer_filename = f"{exercice.loc[0, 'exercise_name']}.sql"
-    with open(f"answers/{answer_filename}") as f:
+    with open(f"answers/{answer_filename}") as f:  # type: ignore
         answer = f.read()
 
     # Création d'un dictionnaire
@@ -57,25 +57,25 @@ input_sql = st.text_area(label="Entrez votre requête :", key="user_input")
 if input_sql != "":
     try:
         result = con.execute(input_sql).df()
-        st.write(result)
     except duckdb.CatalogException as e:
         st.write("Syntaxe SQL invalide")
         st.write(f"{e}")
 
-#     # On force l'ordre des colonnes du résultat en fonction de la solution pour mieux gérer le compare
-#     try:
-#         result = result[solution_df.columns]
-#     except KeyError:
-#         st.write("Nombre de colonne incorrect")
+    # On force l'ordre des colonnes du résultat en fonction de la solution pour mieux gérer le compare
+    try:
+        response_result = con.execute(reponse).df()
+        result = result[response_result.columns]
+    except KeyError:
+        st.warning("Nombre de colonne incorrect", icon="⚠️")
 
-#     # Validation du résultat
-#     try:
-#         compare = result.compare(solution_df)
-#         st.write("Parfait ! C'est le bon résultat")
-#         st.dataframe(result)
-#     except ValueError:
-#         st.write(r"/!\ Le résultat n'est pas celui attendu")
-#         st.dataframe(result)
+    # Validation du résultat
+    try:
+        compare = result.compare(response_result)
+        st.success("Parfait ! C'est le bon résultat")
+        st.dataframe(result)
+    except ValueError:
+        st.warning("Le résultat n'est pas celui attendu", icon="⚠️")
+        st.dataframe(result)
 
 
 # Tab list
@@ -94,4 +94,4 @@ with tab1:
         st.write("")
 
 with tab2:
-    st.write(reponse)
+    st.code(reponse, language="sql")
