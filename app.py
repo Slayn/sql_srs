@@ -1,16 +1,29 @@
 import duckdb
 import streamlit as st
 
+
+def get_all_exercice_information(theme):
+    # Récupération des informations sur l'exercice
+    exercice = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
+
+    # Récupération de la solution
+    answer_filename = f"{exercice.loc[0, 'exercise_name']}.sql"
+    with open(f"answers/{answer_filename}") as f:
+        answer = f.read()
+
+    # Création d'un dictionnaire
+    all_exercice_information = {
+        "info": exercice,
+        "reponse": answer,
+    }
+
+    return all_exercice_information
+
+
+# __main__
+
 # Connection et récupération de la données dans la base duckdb
 con = duckdb.connect(database="data/exercices_sql_tables.duckdb", read_only=False)
-# data = con.execute("SELECT * FROM data").df()
-
-# Défnition de la solution
-# solution_sql = """
-# SELECT * FROM data
-# WHERE product_name = 'redbull'
-# """
-# solution_df = duckdb.sql(solution_sql).df()
 
 
 # Titre du programme
@@ -27,14 +40,27 @@ with st.sidebar:
     )
     st.write("Sujet choisi : ", theme)
 
-    exercice = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
+    # exercice = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
+    try:
+        all_exercice_information = get_all_exercice_information(theme)
+        exercice = all_exercice_information["info"]
+        reponse = all_exercice_information["reponse"]
+    except:
+        exercice = []
+        reponse = ""
+
     st.write(exercice)
 
 # Header / toujours affiché
 input_sql = st.text_area(label="Entrez votre requête :", key="user_input")
 
-# if input_sql != "":
-#     result = duckdb.sql(input_sql).df()
+if input_sql != "":
+    try:
+        result = con.execute(input_sql).df()
+        st.write(result)
+    except duckdb.CatalogException as e:
+        st.write("Syntaxe SQL invalide")
+        st.write(f"{e}")
 
 #     # On force l'ordre des colonnes du résultat en fonction de la solution pour mieux gérer le compare
 #     try:
@@ -52,15 +78,20 @@ input_sql = st.text_area(label="Entrez votre requête :", key="user_input")
 #         st.dataframe(result)
 
 
-# # Tab list
-# tab1, tab2 = st.tabs(["Tables", "Solution"])
+# Tab list
+tab1, tab2 = st.tabs(["Tables", "Solution"])
 
-# # Tabs content
-# with tab1:
-#     st.write("Table : data")
-#     st.dataframe(data)
-#     st.write("Résultat attendu :")
-#     st.dataframe(solution_df)
+# Tabs content
+with tab1:
+    try:
+        exercice_tables = exercice.loc[0, "tables"]
 
-# with tab2:
-#     st.write(solution_sql)
+        for table in exercice_tables:
+            st.write(f"Table : {table}")
+            table_content = con.execute(f"SELECT * FROM {table}").df()
+            st.dataframe(table_content)
+    except:
+        st.write("")
+
+with tab2:
+    st.write(reponse)
